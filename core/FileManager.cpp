@@ -1,4 +1,4 @@
-#include "FileManager.hpp"
+#include "FileManager.h"
 #include <fstream>
 
 LinkedList<Song> FileManager::loadSongs(const std::string& filename) {
@@ -17,8 +17,8 @@ LinkedList<Song> FileManager::loadSongs(const std::string& filename) {
             if (song.isValid()) {
                 songs.push_back(song);
             }
-        } catch (...) {
-            // Ignorar líneas mal formadas
+        } catch (const std::exception&) {
+            // Ignorar lineas mal formadas.
         }
     }
     

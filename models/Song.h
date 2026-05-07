@@ -1,5 +1,6 @@
-#include <string>
 #pragma once
+#include <string>
+
 class Song {
 private:
     int id;
@@ -11,26 +12,22 @@ private:
     std::string filePath;
     
 public:
-    
     Song();
-    Song(int id, const std::string& title, const std::string& artist, 
-         const std::string& album, int year, int duration, const std::string& path);
-    
+    Song(int id, const std::string& title, const std::string& artist,
+         const std::string& album, int year, int durationSeconds, const std::string& filePath);
     
     int getId() const;
     std::string getTitle() const;
     std::string getArtist() const;
     std::string getAlbum() const;
     int getYear() const;
-    int getDuration() const;
     std::string getFilePath() const;
+    int getDurationSeconds() const;
     
-
     std::string getDisplayString() const;
-    
+    std::string toCSV() const;
     
     static Song fromCSV(const std::string& line);
-    
-    
-    std::string toCSV() const;
+    bool isValid() const;
 };
+

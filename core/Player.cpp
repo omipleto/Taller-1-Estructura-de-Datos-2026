@@ -1,5 +1,5 @@
-#include "Player.hpp"
-#include "FileManager.hpp"
+#include "Player.h"
+#include "FileManager.h"
 #include <iostream>
 #include <limits>
 #include <cstdlib>
@@ -35,11 +35,12 @@ void Player::run() {
     while (running) {
         clearScreen();
         
-        std::cout << "Reproduciendo " << getStatusPrefix();
-        if (config.getCurrentSong().isValid()) {
-            std::cout << ": " << config.getCurrentSong().getDisplayString();
-        } else {
-            std::cout << "Reproducción Detenida";
+        // Verificar si no hay canciones
+        if (allSongs.isEmpty()) {
+            std::cout << "No hay canciones disponibles. Agregue canciones con la opcion L" << std::endl;
+            std::cout << "\nPresione Enter para continuar...";
+            std::cin.get();
+            continue;
         }
         std::cout << "\n\n";
         
@@ -48,11 +49,11 @@ void Player::run() {
         std::cout << "Q - Pista Anterior\n";
         std::cout << "E - Pista Siguiente\n";
         std::cout << "S - Activar/Desactivar modo aleatorio\n";
-        std::cout << "R - Repetición (Desactivado/Repetir una/Repetir todas)\n";
-        std::cout << "A - Ver lista de reproducción actual\n";
+        std::cout << "R - Repeticion\n";
+        std::cout << "A - Ver lista de reproduccion actual\n";
         std::cout << "L - Listado de canciones\n";
         std::cout << "X - Salir\n";
-        std::cout << "Ingrese Opción: ";
+        std::cout << "Ingrese Opcion: ";
         
         std::cin >> option;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -70,7 +71,7 @@ void Player::run() {
                 running = false;
                 break;
             default:
-                std::cout << "Opción inválida\n";
+                std::cout << "Opcion invalida\n";
                 std::cin.get();
         }
     }
@@ -78,7 +79,6 @@ void Player::run() {
 
 void Player::playPause() {
     if (allSongs.isEmpty()) return;
-    
     config.setPlaying(!config.isPlaying());
     updateConfigFile();
 }
@@ -109,26 +109,13 @@ void Player::nextTrack() {
         config.getPlaylist().pop_front();
         config.setCurrentSong(nextSong);
         config.setPlaying(true);
-    }
-    else if (!allSongs.isEmpty()) {
-        if (config.getRepeatMode() == RepeatMode::ALL) {
-            regeneratePlaylist();
-            if (!config.getPlaylist().isEmpty()) {
-                Song nextSong = config.getPlaylist().get(0);
-                config.getPlaylist().pop_front();
-                config.setCurrentSong(nextSong);
-                config.setPlaying(true);
-            }
-        } else if (config.getRepeatMode() == RepeatMode::ONE) {
+    } else {
+        regeneratePlaylist();
+        if (!config.getPlaylist().isEmpty()) {
+            Song nextSong = config.getPlaylist().get(0);
+            config.getPlaylist().pop_front();
+            config.setCurrentSong(nextSong);
             config.setPlaying(true);
-        } else {
-            regeneratePlaylist();
-            if (!config.getPlaylist().isEmpty()) {
-                Song nextSong = config.getPlaylist().get(0);
-                config.getPlaylist().pop_front();
-                config.setCurrentSong(nextSong);
-                config.setPlaying(true);
-            }
         }
     }
     
@@ -137,13 +124,10 @@ void Player::nextTrack() {
 
 void Player::toggleShuffle() {
     if (allSongs.isEmpty()) return;
-    
     config.setShuffleMode(!config.getShuffleMode());
-    
     if (config.getShuffleMode()) {
         config.getPlaylist().shuffle();
     }
-    
     updateConfigFile();
 }
 
@@ -161,167 +145,35 @@ void Player::toggleRepeat() {
             config.setRepeatMode(RepeatMode::OFF);
             break;
     }
-    
     updateConfigFile();
 }
 
 void Player::showCurrentPlaylist() {
     if (allSongs.isEmpty()) return;
     
-    bool inSubmenu = true;
-    char option;
-    
-    while (inSubmenu) {
-        clearScreen();
-        
-        std::cout << "Actual " << getStatusPrefix();
-        if (config.getCurrentSong().isValid()) {
-            std::cout << ": " << config.getCurrentSong().getDisplayString();
-        } else {
-            std::cout << ": Vacía";
+    std::cout << "\n=== Lista de Reproduccion Actual ===\n";
+    if (config.getPlaylist().isEmpty()) {
+        std::cout << "Vacia\n";
+    } else {
+        for (int i = 0; i < config.getPlaylist().getSize(); i++) {
+            std::cout << (i+1) << ". " << config.getPlaylist().get(i).getDisplayString() << "\n";
         }
-        std::cout << "\n\n";
-        
-        std::cout << "Lista de reproducción actual:\n";
-        if (config.getPlaylist().isEmpty()) {
-            std::cout << "Vacía\n\n";
-        } else {
-            for (int i = 0; i < config.getPlaylist().getSize(); i++) {
-                std::cout << (i + 1) << ". " << config.getPlaylist().get(i).getDisplayString() << "\n";
-            }
-            std::cout << "\n";
-        }
-        
-        std::cout << "Opciones: ";
-        if (!config.getPlaylist().isEmpty()) {
-            std::cout << "S<num> - Saltar a la canción seleccionada ";
-        }
-        std::cout << "V - Volver al menú principal\n";
-        std::cout << "Ingrese Opción: ";
-        
-        std::cin >> option;
-        
-        if (option == 'V' || option == 'v') {
-            inSubmenu = false;
-        } else if ((option == 'S' || option == 's') && !config.getPlaylist().isEmpty()) {
-            int num;
-            std::cin >> num;
-            if (num >= 1 && num <= config.getPlaylist().getSize()) {
-                if (config.getCurrentSong().isValid()) {
-                    addToHistory(config.getCurrentSong());
-                }
-                
-                Song selected = config.getPlaylist().get(num - 1);
-                
-                for (int i = 0; i < num; i++) {
-                    config.getPlaylist().pop_front();
-                }
-                
-                config.setCurrentSong(selected);
-                config.setPlaying(true);
-                inSubmenu = false;
-                updateConfigFile();
-            }
-        }
-        
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
+    std::cout << "\nPresione Enter para continuar...";
+    std::cin.get();
+    std::cin.get(); // Doble get para asegurar
 }
 
 void Player::showAllSongsMenu() {
     if (allSongs.isEmpty()) return;
     
-    bool inSubmenu = true;
-    std::string option;
-    
-    while (inSubmenu) {
-        clearScreen();
-        
-        std::cout << "Actual " << getStatusPrefix();
-        if (config.getCurrentSong().isValid()) {
-            std::cout << ": " << config.getCurrentSong().getDisplayString();
-        } else {
-            std::cout << ": Vacía";
-        }
-        std::cout << "\n\n";
-        
-        std::cout << "Canciones registradas:\n";
-        for (int i = 0; i < allSongs.getSize(); i++) {
-            std::cout << (i + 1) << ". " << allSongs.get(i).getDisplayString() << "\n";
-        }
-        
-        std::cout << "\nOpciones: ";
-        std::cout << "R<num> - Reproducir canción seleccionada ";
-        std::cout << "A<num> - Agregar canción seleccionada al final ";
-        std::cout << "N - Agregar canción al registro ";
-        std::cout << "D<num> - Eliminar canción seleccionada ";
-        std::cout << "V - Volver al menú principal\n";
-        std::cout << "Ingrese Opción: ";
-        
-        std::getline(std::cin, option);
-        
-        if (option == "V" || option == "v") {
-            inSubmenu = false;
-        } else if (option == "N" || option == "n") {
-            std::string title, artist, album, filePath;
-            int year, duration;
-            
-            std::cout << "Nombre de la canción: ";
-            std::getline(std::cin, title);
-            std::cout << "Nombre del artista: ";
-            std::getline(std::cin, artist);
-            std::cout << "Nombre del álbum: ";
-            std::getline(std::cin, album);
-            std::cout << "Año de lanzamiento: ";
-            std::cin >> year;
-            std::cout << "Duración en segundos: ";
-            std::cin >> duration;
-            std::cin.ignore();
-            std::cout << "Ruta del archivo: ";
-            std::getline(std::cin, filePath);
-            
-            Song newSong(config.getNextId(), title, artist, album, year, duration, filePath);
-            allSongs.push_back(newSong);
-            FileManager::appendSong("music_source.txt", newSong);
-            config.setNextId(config.getNextId() + 1);
-            updateConfigFile();
-            
-        } else if (!option.empty() && (option[0] == 'R' || option[0] == 'r')) {
-            int num = std::stoi(option.substr(1));
-            if (num >= 1 && num <= allSongs.getSize()) {
-                Song selected = allSongs.get(num - 1);
-                
-                LinkedList<Song> newPlaylist;
-                for (int i = 0; i < allSongs.getSize(); i++) {
-                    if (allSongs.get(i).getId() != selected.getId()) {
-                        newPlaylist.push_back(allSongs.get(i));
-                    }
-                }
-                newPlaylist.shuffle();
-                
-                config.setPlaylist(newPlaylist);
-                config.setCurrentSong(selected);
-                config.setPlaying(true);
-                inSubmenu = false;
-                updateConfigFile();
-            }
-        } else if (!option.empty() && (option[0] == 'A' || option[0] == 'a')) {
-            int num = std::stoi(option.substr(1));
-            if (num >= 1 && num <= allSongs.getSize()) {
-                Song selected = allSongs.get(num - 1);
-                config.getPlaylist().push_back(selected);
-                updateConfigFile();
-            }
-        } else if (!option.empty() && (option[0] == 'D' || option[0] == 'd')) {
-            int num = std::stoi(option.substr(1));
-            if (num >= 1 && num <= allSongs.getSize()) {
-                int songId = allSongs.get(num - 1).getId();
-                allSongs.remove(num - 1);
-                FileManager::removeSong("music_source.txt", songId);
-                updateConfigFile();
-            }
-        }
+    std::cout << "\n=== Todas las Canciones ===\n";
+    for (int i = 0; i < allSongs.getSize(); i++) {
+        std::cout << (i+1) << ". " << allSongs.get(i).getDisplayString() << "\n";
     }
+    std::cout << "\nPresione Enter para continuar...";
+    std::cin.get();
+    std::cin.get(); // Doble get para asegurar
 }
 
 void Player::exit() {
@@ -338,11 +190,9 @@ void Player::regeneratePlaylist() {
     for (int i = 0; i < allSongs.getSize(); i++) {
         newPlaylist.push_back(allSongs.get(i));
     }
-    
     if (config.getShuffleMode()) {
         newPlaylist.shuffle();
     }
-    
     config.setPlaylist(newPlaylist);
 }
 
@@ -355,7 +205,6 @@ void Player::addToHistory(const Song& song) {
 
 Song Player::getPreviousFromHistory() {
     if (history.isEmpty()) return Song();
-    
     Song previous = history.get(0);
     history.pop_front();
     return previous;
@@ -394,11 +243,7 @@ std::string Player::getStatusPrefix() const {
     
     std::string repeatStr = getRepeatModeString();
     if (!repeatStr.empty()) {
-        if (config.getShuffleMode()) {
-            prefix += repeatStr;
-        } else {
-            prefix += "-" + repeatStr;
-        }
+        prefix += "-" + repeatStr;
     }
     
     return prefix;

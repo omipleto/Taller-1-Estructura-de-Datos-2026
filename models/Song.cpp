@@ -1,4 +1,5 @@
 #include "Song.h"
+#include <iostream>
 
 Song::Song() : id(-1), year(0), durationSeconds(0) {}
 
@@ -8,7 +9,6 @@ Song::Song(int id, const std::string& title, const std::string& artist,
       year(year), durationSeconds(durationSeconds), filePath(filePath) {}
 
 int Song::getId() const { return id; }
-void Song::setId(int id) { this->id = id; }
 std::string Song::getTitle() const { return title; }
 std::string Song::getArtist() const { return artist; }
 std::string Song::getAlbum() const { return album; }
@@ -30,27 +30,32 @@ Song Song::fromCSV(const std::string& line) {
     
     size_t start = 0;
     size_t end = line.find(',');
-    
+    if (end == std::string::npos) return song;
     song.id = std::stoi(line.substr(start, end - start));
     
     start = end + 1;
     end = line.find(',', start);
+    if (end == std::string::npos) return song;
     song.title = line.substr(start, end - start);
     
     start = end + 1;
     end = line.find(',', start);
+    if (end == std::string::npos) return song;
     song.artist = line.substr(start, end - start);
     
     start = end + 1;
     end = line.find(',', start);
+    if (end == std::string::npos) return song;
     song.album = line.substr(start, end - start);
     
     start = end + 1;
     end = line.find(',', start);
+    if (end == std::string::npos) return song;
     song.year = std::stoi(line.substr(start, end - start));
     
     start = end + 1;
     end = line.find(',', start);
+    if (end == std::string::npos) return song;
     song.durationSeconds = std::stoi(line.substr(start, end - start));
     
     start = end + 1;

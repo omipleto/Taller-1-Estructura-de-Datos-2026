@@ -1,7 +1,7 @@
-#pragma once 
-#include "../data_structures/LinkedList.hpp"
-#include "../models/Song.hpp"
-#include "../models/Config.hpp"
+#pragma once
+#include "../data_structures/LinkedList.h"
+#include "../models/Song.h"
+#include "../models/Config.h"
 #include <string>
 
 class Player {
@@ -32,3 +32,4 @@ public:
     void showAllSongsMenu();
     void exit();
 };
+

@@ -1,11 +1,13 @@
 #include "Config.h"
 #include <fstream>
 
-Config::Config() : nextId(1), isPlaying(false), shuffleMode(false), repeatMode(RepeatMode::OFF) {}
+Config::Config() : nextId(1), playing(false), shuffleMode(false), repeatMode(RepeatMode::OFF) {}
 
 bool Config::loadFromFile(const std::string& filename, const LinkedList<Song>& allSongs) {
     std::ifstream file(filename);
-    if (!file.is_open()) return false;
+    if (!file.is_open()) {
+        return false;
+    }
     
     std::string line;
     while (std::getline(file, line)) {
@@ -17,7 +19,8 @@ bool Config::loadFromFile(const std::string& filename, const LinkedList<Song>& a
         
         if (key == "NEXT_ID") {
             nextId = std::stoi(value);
-        } else if (key == "CURRENT_SONG_ID") {
+        }
+        else if (key == "CURRENT_SONG_ID") {
             int songId = std::stoi(value);
             for (int i = 0; i < allSongs.getSize(); i++) {
                 if (allSongs.get(i).getId() == songId) {
@@ -25,15 +28,19 @@ bool Config::loadFromFile(const std::string& filename, const LinkedList<Song>& a
                     break;
                 }
             }
-        } else if (key == "IS_PLAYING") {
-            isPlaying = (value == "true");
-        } else if (key == "SHUFFLE_MODE") {
+        }
+        else if (key == "IS_PLAYING") {
+            playing = (value == "true");
+        }
+        else if (key == "SHUFFLE_MODE") {
             shuffleMode = (value == "true");
-        } else if (key == "REPEAT_MODE") {
+        }
+        else if (key == "REPEAT_MODE") {
             if (value == "OFF") repeatMode = RepeatMode::OFF;
             else if (value == "ONE") repeatMode = RepeatMode::ONE;
             else if (value == "ALL") repeatMode = RepeatMode::ALL;
-        } else if (key == "PLAYLIST") {
+        }
+        else if (key == "PLAYLIST") {
             if (value.empty()) continue;
             
             size_t start = 0;
@@ -62,6 +69,7 @@ bool Config::loadFromFile(const std::string& filename, const LinkedList<Song>& a
     }
     
     file.close();
+    
     return true;
 }
 
@@ -71,7 +79,7 @@ void Config::saveToFile(const std::string& filename) const {
     
     file << "NEXT_ID=" << nextId << "\n";
     file << "CURRENT_SONG_ID=" << (currentSong.isValid() ? currentSong.getId() : -1) << "\n";
-    file << "IS_PLAYING=" << (isPlaying ? "true" : "false") << "\n";
+    file << "IS_PLAYING=" << (playing ? "true" : "false") << "\n";
     file << "SHUFFLE_MODE=" << (shuffleMode ? "true" : "false") << "\n";
     
     std::string repeatStr;
@@ -94,12 +102,14 @@ int Config::getNextId() const { return nextId; }
 void Config::setNextId(int id) { nextId = id; }
 Song Config::getCurrentSong() const { return currentSong; }
 void Config::setCurrentSong(const Song& song) { currentSong = song; }
-bool Config::isPlaying() const { return isPlaying; }
-void Config::setPlaying(bool playing) { isPlaying = playing; }
+bool Config::isPlaying() const { return playing; }
+void Config::setPlaying(bool p) { playing = p; }
 bool Config::getShuffleMode() const { return shuffleMode; }
 void Config::setShuffleMode(bool shuffle) { shuffleMode = shuffle; }
 RepeatMode Config::getRepeatMode() const { return repeatMode; }
 void Config::setRepeatMode(RepeatMode mode) { repeatMode = mode; }
 LinkedList<Song>& Config::getPlaylist() { return playlist; }
-const LinkedList<Song>& Config::getPlaylist() const { return playlist; }
-void Config::setPlaylist(const LinkedList<Song>& newPlaylist) { playlist = newPlaylist; }
+
+void Config::setPlaylist(const LinkedList<Song>& newPlaylist) {
+    playlist = newPlaylist;
+}
