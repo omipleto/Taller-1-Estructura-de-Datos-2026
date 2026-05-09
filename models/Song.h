@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <sstream>
+
 
 class Song {
 private:
@@ -24,10 +26,9 @@ public:
     std::string getFilePath() const;
     int getDurationSeconds() const;
     
-    std::string getDisplayString() const;
-    std::string toCSV() const;
+    void show();
+    std::string toFileLine() const;
     
-    static Song fromCSV(const std::string& line);
     bool isValid() const;
 };
 

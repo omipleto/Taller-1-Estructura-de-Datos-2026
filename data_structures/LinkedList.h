@@ -21,6 +21,25 @@ public:
     LinkedList() : head(nullptr), tail(nullptr), size(0) {
         srand(12345);
     }
+
+    LinkedList(const LinkedList& other) : head(nullptr), tail(nullptr), size(0) {
+        Node<T>* current = other.head;
+        while (current) {
+            push_back(current->data);
+            current = current->next;
+        }
+    }
+
+    LinkedList& operator=(const LinkedList& other) {
+        if (this == &other) return *this;
+        clear();
+        Node<T>* current = other.head;
+        while (current) {
+            push_back(current->data);
+            current = current->next;
+        }
+        return *this;
+    }
     
     ~LinkedList() {
         clear();
@@ -74,6 +93,30 @@ public:
         }
         size--;
     }
+
+        void remove(int index) {
+        if (index < 0 || index >= size) return;
+        
+        if (index == 0) {
+            pop_front();
+            return;
+        }
+        
+        Node<T>* current = head;
+        for (int i = 0; i < index - 1; i++) {
+            current = current->next;
+        }
+        
+        Node<T>* toDelete = current->next;
+        current->next = toDelete->next;
+        
+        if (toDelete == tail) {
+            tail = current;
+        }
+        
+        delete toDelete;
+        size--;
+    }
     
     T& get(int index) {
         if (index < 0 || index >= size) {
@@ -117,23 +160,24 @@ public:
     
     void shuffle() {
         if (size <= 1) return;
-        
-        T* arr = new T[size];
+
+        int originalSize = size;
+        T* arr = new T[originalSize];
         Node<T>* current = head;
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < originalSize; i++) {
             arr[i] = current->data;
             current = current->next;
         }
-        
-        for (int i = size - 1; i > 0; i--) {
+
+        for (int i = originalSize - 1; i > 0; i--) {
             int j = rand() % (i + 1);
             T temp = arr[i];
             arr[i] = arr[j];
             arr[j] = temp;
         }
-        
+
         clear();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < originalSize; i++) {
             push_back(arr[i]);
         }
         

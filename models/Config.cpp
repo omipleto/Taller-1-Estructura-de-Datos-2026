@@ -8,6 +8,8 @@ bool Config::loadFromFile(const std::string& filename, const LinkedList<Song>& a
     if (!file.is_open()) {
         return false;
     }
+
+    playlist.clear();
     
     std::string line;
     while (std::getline(file, line)) {

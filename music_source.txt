@@ -1,3 +1,0 @@
-1,Bohemian Rhapsody,Queen,A Night at the Opera,1975,355,/music/bohemian.mp3
-2,Imagine,John Lennon,Imagine,1971,183,/music/imagine.mp3
-3,Hey Jude,The Beatles,The Beatles,1968,431,/music/heyjude.mp3

@@ -5,9 +5,12 @@
 
 class FileManager {
 public:
-    static LinkedList<Song> loadSongs(const std::string& filename);
-    static void saveSongs(const std::string& filename, const LinkedList<Song>& songs);
-    static void appendSong(const std::string& filename, const Song& song);
-    static void removeSong(const std::string& filename, int songId);
-};
+    FileManager();
+    ~FileManager();
+
+    void loadSongs(LinkedList<Song>& songs, const std::string& filename);
+    void saveSongs(LinkedList<Song>& songs, const std::string& filename);
+    void addSong(const std::string& filename, const Song& song);
+    void removeSong(const std::string& filename, int songId);
+};    
 

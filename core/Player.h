@@ -2,6 +2,7 @@
 #include "../data_structures/LinkedList.h"
 #include "../models/Song.h"
 #include "../models/Config.h"
+#include "FileManager.h"
 #include <string>
 
 class Player {
@@ -9,6 +10,7 @@ private:
     LinkedList<Song> allSongs;
     Config config;
     LinkedList<Song> history;
+    FileManager fileManager;
     
     void updateConfigFile();
     void regeneratePlaylist();
@@ -20,6 +22,8 @@ private:
     
 public:
     Player();
+    ~Player();
+    
     bool initialize();
     void run();
     
